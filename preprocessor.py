@@ -30,6 +30,48 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         return ""
 
 
+def extract_name_from_pdf(pdf_path: str) -> str:
+    """
+    Extract the candidate's name from a resume PDF.
+    Looks for capitalized words at the beginning of the document.
+    Returns empty string if extraction fails.
+    """
+    try:
+        raw_text = extract_text_from_pdf(pdf_path)
+        if not raw_text:
+            return ""
+        
+        # Get first 500 characters (name is typically at the top)
+        first_section = raw_text[:500]
+        
+        # Split into lines and get the first non-empty line
+        lines = first_section.split('\n')
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Look for a line with 1-4 capitalized words (typical name format)
+            words = line.split()
+            if words:
+                # Filter words that are NOT all caps (avoid headers) and not too short
+                name_words = [
+                    w for w in words[:4]  # Max 4 words in a name
+                    if w and (w[0].isupper() or w[0].isdigit()) and len(w) > 1
+                ]
+                
+                if name_words:
+                    candidate_name = ' '.join(name_words)
+                    # Only return if it looks like a name (not all numbers, reasonable length)
+                    if not candidate_name.isdigit() and len(candidate_name) > 2 and len(candidate_name) < 60:
+                        return candidate_name
+        
+        return ""
+    except Exception as e:
+        print(f"[ERROR] Could not extract name from PDF: {pdf_path} — {e}")
+        return ""
+
+
 def clean_text(text: str) -> str:
     """
     Clean and normalize raw resume text.
