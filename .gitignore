@@ -2,6 +2,9 @@
 venv/
 env/
 
+resume_classifier.db
+uploads/
+
 # Python cache
 __pycache__/
 *.pyc
